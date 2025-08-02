@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/healthcare
+      - JWT_SECRET=your-super-secret-key-here
+      - BLOCKCHAIN_NODE_URL=http://ganache:8545
+      - BLOCKCHAIN_NETWORK_ID=1337
+    depends_on:
+      - mongodb
+      - ganache
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  ganache:
+    image: trufflesuite/ganache:latest
+    ports:
+      - "8545:8545"
+    command:
+      - --mnemonic="test test test test test test test test test test test junk"
+      - --accounts=10
+      - --networkId=5777
+
+volumes:
+  mongodb_data: 
